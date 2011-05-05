@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\include\Prelude\list.hpp" />
+    <ClInclude Include="..\include\Prelude\internal\common.hpp">
+      <Filter>Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Prelude\allocator.hpp" />
+    <ClInclude Include="..\include\Prelude\region.hpp" />
+    <ClInclude Include="..\include\Prelude\internal\ChunkList.hpp">
+      <Filter>Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Prelude\FastList.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Internal">
+      <UniqueIdentifier>{44f1dd91-8d89-443b-81c5-7248bf0d1a7e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
