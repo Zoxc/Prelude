@@ -3,76 +3,87 @@
 
 namespace Prelude
 {
-	class Allocator
+	template<class T> class ReferenceProvider
 	{
 		public:
-			template<class T> class Wrap
+			typedef ReferenceProvider *Reference;
+					
+			class ReferenceClass
 			{
 				private:
-					T ref;
+					T &reference;
 				public:
-					Wrap(T ref) : ref(ref) {}
+					ReferenceClass(ReferenceProvider<T> *reference) : reference(*reference->reference) {}
 
-					static Wrap &default_reference()
+					void *allocate(size_t bytes)
 					{
-						assert(0); // This should never be called!
-
-						return *(Wrap *)0;
+						return reference.alloc(bytes);
 					}
 
-					operator T()
+					void *reallocate(void *memory, size_t old_size, size_t new_size)
 					{
-						return ref;
+						return reference.realloc(memory, old_size, new_size);
 					}
 
-					void *alloc(size_t bytes)
+					void free(void *memory)
 					{
-						return ref.alloc(bytes);
-					}
-
-					void *realloc(void *mem, size_t old_size, size_t new_size)
-					{
-						return ref.realloc(mem, old_size, new_size);
-					}
-
-					void free(void *mem)
-					{
-						return ref.free(mem);
+						return reference.free(memory);
 					}
 			};
+
+			T *reference;
+
+			ReferenceProvider() {}
+
+			void set(T *reference)
+			{
+				this->reference = reference;
+			}
+					
+			class DefaultReference
+			{
+				public:
+					static ReferenceProvider<T> *reference;
+			};
+					
+	};
+			
+	template<class T> class NoReferenceProvider
+	{
+		private:
+			NoReferenceProvider() {}
+		public:
+			typedef NoReferenceProvider *Reference;
+			typedef T ReferenceClass;
+			typedef NoReferenceProvider DefaultReference;
+
+			static NoReferenceProvider *reference;
 	};
 
-	class StandardAllocator:
-		public Allocator
+	template<typename T> NoReferenceProvider<T> *NoReferenceProvider<T>::reference = nullptr;
+
+	class StandardAllocator
 	{
 		public:
-			typedef StandardAllocator Reference;
-			typedef StandardAllocator Storage;
+			typedef NoReferenceProvider<StandardAllocator> ReferenceProvider;
 
-			StandardAllocator(bool dummy)
-			{
-			}
+			StandardAllocator(ReferenceProvider *reference) {}
 			
-			static bool default_reference()
-			{
-				return true;
-			}
-
 			void *allocate(size_t bytes)
 			{
 				return std::malloc(bytes);
 			}
 
-			void *reallocate(void *table, size_t old, size_t bytes)
+			void *reallocate(void *memory, size_t old, size_t bytes)
 			{
-				return std::realloc(table, bytes);
+				return std::realloc(memory, bytes);
 			}
 
 			static const bool can_free = true;
 
-			void free(void *table)
+			void free(void *memory)
 			{
-				return std::free(table);
+				return std::free(memory);
 			}
 	};
 };

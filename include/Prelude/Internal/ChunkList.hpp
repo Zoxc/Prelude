@@ -13,15 +13,14 @@ namespace Prelude
 		
 		private:
 			FastList<Chunk> chunks;
-			typename Allocator::Storage allocator_reference;
+			typename Allocator::ReferenceProvider::ReferenceClass allocator;
 
 		public:
-			ChunkList() : allocator_reference(Allocator::Storage::default_reference()) {}
-			ChunkList(typename Allocator::Reference allocator_reference) : allocator_reference(allocator_reference)	{}
+			ChunkList(typename Allocator::ReferenceProvider::Reference allocator = Allocator::ReferenceProvider::DefaultReference::reference) : allocator(allocator) {}
 			
 			void *allocate(size_t bytes)
 			{
-				void *result = allocator_reference.allocate(bytes + sizeof(Chunk));
+				void *result = allocator.allocate(bytes + sizeof(Chunk));
 				
 				assert(result && "No memory was allocated.");
 				

@@ -33,12 +33,20 @@ namespace Prelude
 				return result;
 			}
 		public:
-			typedef Region &Reference;
-			typedef typename Allocator::Wrap<Region &> Storage;
+			typedef typename ReferenceProvider<Region> ReferenceProvider;
+
+			ReferenceProvider reference;
+
+			Region(typename Allocator::ReferenceProvider::Reference allocator = Allocator::ReferenceProvider::DefaultReference::reference) : chunk_list(allocator), current(0), max(0)
+			{
+				reference.set(this);
+			}
 			
-			Region() : current(0), max(0) {}
-			Region(typename Allocator::Reference allocator_reference) : chunk_list(allocator_reference), current(0), max(0)	{}
-			
+			operator ReferenceProvider *()
+			{
+				return &reference;
+			}
+
 			void *allocate(size_t bytes)
 			{
 				uint8_t *result;
