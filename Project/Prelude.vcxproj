@@ -12,10 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Prelude\Allocator.hpp" />
+    <ClInclude Include="..\include\Prelude\CountedList.hpp" />
     <ClInclude Include="..\include\Prelude\FastList.hpp" />
     <ClInclude Include="..\include\Prelude\Internal\ChunkList.hpp" />
     <ClInclude Include="..\include\Prelude\Internal\Common.hpp" />
     <ClInclude Include="..\include\Prelude\List.hpp" />
+    <ClInclude Include="..\include\Prelude\Map.hpp" />
     <ClInclude Include="..\include\Prelude\Region.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -33,7 +33,7 @@ namespace Prelude
 			
 			~ChunkList()
 			{
-				FastList<Chunk>::Iterator chunk = chunks.begin();
+				typename FastList<Chunk>::Iterator chunk = chunks.begin();
 
 				while(chunk != chunks.end())
 				{

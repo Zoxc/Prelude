@@ -3,21 +3,26 @@
 
 namespace Prelude
 {
-	template<class T> class ReferenceProvider
+	template<class T> class WithReferenceProvider
 	{
 		public:
-			typedef ReferenceProvider *Reference;
+			typedef WithReferenceProvider *Reference;
 					
 			class ReferenceClass
 			{
 				private:
 					T &reference;
 				public:
-					ReferenceClass(ReferenceProvider<T> *reference) : reference(*reference->reference) {}
+					ReferenceClass(WithReferenceProvider<T> *reference) : reference(*reference->reference) {}
+
+					Reference get_reference()
+					{
+						return reference;
+					}
 
 					void *allocate(size_t bytes)
 					{
-						return reference.alloc(bytes);
+						return reference.allocate(bytes);
 					}
 
 					void *reallocate(void *memory, size_t old_size, size_t new_size)
@@ -33,7 +38,7 @@ namespace Prelude
 
 			T *reference;
 
-			ReferenceProvider() {}
+			WithReferenceProvider() {}
 
 			void set(T *reference)
 			{
@@ -43,7 +48,7 @@ namespace Prelude
 			class DefaultReference
 			{
 				public:
-					static ReferenceProvider<T> *reference;
+					static WithReferenceProvider<T> *reference;
 			};
 					
 	};
@@ -69,6 +74,11 @@ namespace Prelude
 
 			StandardAllocator(ReferenceProvider *reference) {}
 			
+			ReferenceProvider::Reference reference()
+			{
+				return ReferenceProvider::reference;
+			}
+
 			void *allocate(size_t bytes)
 			{
 				return std::malloc(bytes);

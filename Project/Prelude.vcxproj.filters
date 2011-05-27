@@ -11,6 +11,8 @@
       <Filter>Internal</Filter>
     </ClInclude>
     <ClInclude Include="..\include\Prelude\FastList.hpp" />
+    <ClInclude Include="..\include\Prelude\Map.hpp" />
+    <ClInclude Include="..\include\Prelude\CountedList.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Internal">

@@ -33,7 +33,7 @@ namespace Prelude
 				return result;
 			}
 		public:
-			typedef typename ReferenceProvider<Region> ReferenceProvider;
+			typedef WithReferenceProvider<Region> ReferenceProvider;
 
 			ReferenceProvider reference;
 
@@ -46,6 +46,8 @@ namespace Prelude
 			{
 				return &reference;
 			}
+			
+			static const bool can_free = false;
 
 			void *allocate(size_t bytes)
 			{
@@ -69,7 +71,7 @@ namespace Prelude
 
 				void *result = allocate(new_size);
 				
-				std::memcpy(result, mem, old_size);
+				std::memcpy(result, memory, old_size);
 			
 				return result;
 			}
@@ -80,20 +82,20 @@ namespace Prelude
 	};
 };
 
-template<typename Allocator> static inline void *operator new(size_t bytes, Prelude::Region<Allocator> &region) throw()
+template<typename Allocator> inline void *operator new(size_t bytes, Prelude::Region<Allocator> &region) throw()
 {
 	return region.allocate(bytes);
 }
 
-template<typename Allocator> static inline void operator delete(void *, Prelude::Region<Allocator> &region) throw()
+template<typename Allocator> inline void operator delete(void *, Prelude::Region<Allocator> &region) throw()
 {
 }
 
-template<typename Allocator> static inline void *operator new[](size_t bytes, Prelude::Region<Allocator> &region) throw()
+template<typename Allocator> inline void *operator new[](size_t bytes, Prelude::Region<Allocator> &region) throw()
 {
 	return region.allocate(bytes);
 }
 
-template<typename Allocator> static inline void operator delete[](void *, Prelude::Region<Allocator> &region) throw()
+template<typename Allocator> inline void operator delete[](void *, Prelude::Region<Allocator> &region) throw()
 {
 }
