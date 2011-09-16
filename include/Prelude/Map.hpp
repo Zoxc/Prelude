@@ -105,6 +105,9 @@ namespace Prelude
 			}
 
 		public:
+			typedef K Key;
+			typedef V Value;
+
 			Map(size_t initial, typename Allocator::ReferenceProvider::Reference allocator = Allocator::ReferenceProvider::DefaultReference::reference) : allocator(allocator)
 			{
 				entries = 0;
@@ -172,6 +175,19 @@ namespace Prelude
 				return fails();
 			}
 			
+			template<typename func> void each_pair(func do_for_pair)
+			{
+				for(size_t i = 0; i <= mask; ++i)
+				{
+					Pair *pair = table[i];
+
+					if(pair)
+					{
+						do_for_pair(pair->key, pair->value);
+					}
+				}
+			}
+			
 			template<typename func> V get_create(K key, func create_value)
 			{
 				size_t index = T::hash_key(key) & mask;
@@ -217,6 +233,11 @@ namespace Prelude
 				}
 
 				return 0;
+			}
+
+			size_t get_entries()
+			{
+				return entries;
 			}
 			
 			bool has(K key)
