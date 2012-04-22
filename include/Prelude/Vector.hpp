@@ -60,7 +60,8 @@ namespace Prelude
 			}
 
 		public:
-			Vector(size_t initial, typename Allocator::Ref::Type allocator = Allocator::Ref::standard) : allocator(allocator)
+			//TODO: Change; duplicate constructors here because of a Visual C++ bug
+			Vector(size_t initial)
 			{
 				_size = 0;
 				_capacity = 1 << initial;
@@ -68,7 +69,22 @@ namespace Prelude
 				table = (T *)this->allocator.allocate(sizeof(T) * _capacity);
 			}
 			
-			Vector(typename Allocator::Ref::Type allocator = Allocator::Ref::standard) : allocator(allocator)
+			Vector(size_t initial, typename Allocator::Ref::Type allocator) : allocator(allocator)
+			{
+				_size = 0;
+				_capacity = 1 << initial;
+				
+				table = (T *)this->allocator.allocate(sizeof(T) * _capacity);
+			}
+			
+			Vector()
+			{
+				_size = 0;
+				_capacity = 0;
+				table = 0;
+			}
+			
+			Vector(typename Allocator::Ref::Type allocator) : allocator(allocator)
 			{
 				_size = 0;
 				_capacity = 0;

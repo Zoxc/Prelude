@@ -74,6 +74,7 @@ namespace Prelude
 		public NoReferenceProvider<StandardAllocator>
 	{
 		public:
+			StandardAllocator() {}
 			StandardAllocator(Ref::Type reference) {}
 			StandardAllocator(const StandardAllocator &allocator) {}
 			
