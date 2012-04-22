@@ -4,7 +4,15 @@
 #include <cstdlib>
 #include <iostream>
 
-#if (__GNUC__ == 4) && (__GNUC_MINOR__ <= 5)
+#ifndef __has_builtin
+	#define __has_builtin(x) 0
+#endif
+
+#ifndef __has_feature
+	#define __has_feature(x) 0
+#endif
+
+#if (__GNUC__ == 4) && (__GNUC_MINOR__ <= 5) && !__has_feature(cxx_nullptr)
 	const class {
 	public:
 		template<class T> operator T *() const
@@ -31,10 +39,6 @@
 	#define prelude_noreturn __attribute__((noreturn)) 
 	#define prelude_likely(x) __builtin_expect((x),1)
 	#define prelude_unlikely(x) __builtin_expect((x),0)
-#endif
-
-#ifndef __has_builtin
-	#define __has_builtin(x) 0
 #endif
 
 namespace Prelude

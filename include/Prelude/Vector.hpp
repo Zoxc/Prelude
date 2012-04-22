@@ -76,7 +76,7 @@ namespace Prelude
 			}
 			
 			Vector(const Vector &vector) :
-				allocator(allocator),
+				allocator(vector.allocator),
 				_size(vector._size),
 				_capacity(vector._capacity)
 			{

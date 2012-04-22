@@ -16,7 +16,7 @@ namespace Prelude
 					T &allocator;
 				public:
 					Storage(Type reference) : allocator(*static_cast<T *>(reference)) {}
-					Storage(const Storage &storage) : allocator(allocator) {}
+					Storage(const Storage &storage) : allocator(storage.allocator) {}
 
 					Type reference()
 					{
