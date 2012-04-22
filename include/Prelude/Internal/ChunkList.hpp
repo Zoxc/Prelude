@@ -13,10 +13,10 @@ namespace Prelude
 		
 		private:
 			FastList<Chunk> chunks;
-			typename Allocator::ReferenceProvider::ReferenceClass allocator;
+			typename Allocator::Ref::Storage allocator;
 
 		public:
-			ChunkList(typename Allocator::ReferenceProvider::Reference allocator = Allocator::ReferenceProvider::DefaultReference::reference) : allocator(allocator) {}
+			ChunkList(typename Allocator::Ref::Type allocator = Allocator::Ref::standard) : allocator(allocator) {}
 			
 			void *allocate(size_t bytes)
 			{

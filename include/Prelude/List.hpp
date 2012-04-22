@@ -32,11 +32,11 @@ namespace Prelude
 
 		void append(T *node)
 		{
-			assert(node != 0);
+			prelude_debug_assert(node != 0);
 			
 			(node->*field).next = 0;
 			
-			if(last != 0)
+			if(prelude_likely(last != 0))
 			{
 				(last->*field).next = static_cast<E *>(node);
 				last = node;
@@ -103,6 +103,91 @@ namespace Prelude
 		Iterator end()
 		{
 			return Iterator(0);
+		}
+		
+		class MutableIterator
+		{
+		private:
+			List &list;
+			T *current;
+			T *prev;
+
+		public:
+			MutableIterator(List &list) : list(list), current(list.first), prev(0) {}
+
+			void step()
+			{
+				prev = current;
+				current = static_cast<T *>((current->*field).next);
+			}
+
+			operator bool()
+			{
+				return current != 0;
+			}
+
+			T &operator ++()
+			{
+				step();
+				return *current;
+			}
+
+			T &operator ++(int)
+			{
+				T *result = current;
+				step();
+				return *result;
+			}
+
+			T *operator*()
+			{
+				return current;
+			}
+
+			T &operator ()()
+			{
+				return *current;
+			}
+			
+			void replace(T *node)
+			{
+				if(prev)
+				{
+					prev->*field.next = static_cast<E *>(node); 
+				}
+				else
+				{
+					list.first = node;
+				}
+				
+				node->*field.next = this->current->*field.next; 
+				
+				if(node->*field.next == 0)
+					list.last = node;
+				
+				this->current = node;
+			}
+
+			void insert(T *node)
+			{
+				if(prev)
+					(prev->*field).next = static_cast<E *>(node); 
+				else
+					list.first = node;
+				
+				if(this->current)
+					(node->*field).next = (this->current->*field).next; 
+				else
+				{
+					list.last = node;
+					(node->*field).next = 0;
+				}
+			}
+		};
+
+		MutableIterator mutable_iterator()
+		{
+			return MutableIterator(*this);
 		}
 	};
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include "Internal/Common.hpp"
+#include "Allocator.hpp"
 
 namespace Prelude
 {
@@ -28,7 +29,7 @@ namespace Prelude
 			};
 
 			Pair **table;
-			typename Allocator::ReferenceProvider::ReferenceClass allocator;
+			typename Allocator::Ref::Storage allocator;
 			size_t mask;
 			size_t entries;
 			
@@ -100,7 +101,7 @@ namespace Prelude
 			{
 				entries++;
 
-				if(entries > mask)
+				if(prelude_unlikely(entries > mask))
 					expand();
 			}
 
@@ -108,7 +109,7 @@ namespace Prelude
 			typedef K Key;
 			typedef V Value;
 
-			Map(size_t initial, typename Allocator::ReferenceProvider::Reference allocator = Allocator::ReferenceProvider::DefaultReference::reference) : allocator(allocator)
+			Map(size_t initial, typename Allocator::Ref::Type allocator = Allocator::Ref::standard) : allocator(allocator)
 			{
 				entries = 0;
 
@@ -262,7 +263,7 @@ namespace Prelude
 					increase();
 			}
 			
-			typename Allocator::ReferenceProvider::Reference get_allocator()
+			typename Allocator::Ref::Type get_allocator()
 			{
 				return allocator.get_reference();
 			}

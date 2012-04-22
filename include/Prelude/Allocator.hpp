@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdlib>
 #include "Internal/Common.hpp"
 
 namespace Prelude
@@ -6,79 +7,76 @@ namespace Prelude
 	template<class T> class WithReferenceProvider
 	{
 		public:
-			typedef WithReferenceProvider *Reference;
+			typedef WithReferenceProvider Ref;
+			typedef WithReferenceProvider *Type;
 					
-			class ReferenceClass
+			class Storage
 			{
 				private:
-					T &reference;
+					T &allocator;
 				public:
-					ReferenceClass(WithReferenceProvider<T> *reference) : reference(*reference->reference) {}
+					Storage(Type reference) : allocator(*static_cast<T *>(reference)) {}
+					Storage(const Storage &storage) : allocator(allocator) {}
 
-					Reference get_reference()
+					Type reference()
 					{
-						return reference;
+						return &allocator;
 					}
 
 					void *allocate(size_t bytes)
 					{
-						return reference.allocate(bytes);
+						return allocator.allocate(bytes);
 					}
 
 					void *reallocate(void *memory, size_t old_size, size_t new_size)
 					{
-						return reference.realloc(memory, old_size, new_size);
+						return allocator.reallocate(memory, old_size, new_size);
 					}
 
 					void free(void *memory)
 					{
-						return reference.free(memory);
+						return allocator.free(memory);
 					}
 			};
 
-			T *reference;
-
-			WithReferenceProvider() {}
-
-			void set(T *reference)
+			operator Type()
 			{
-				this->reference = reference;
+				return this;
 			}
-					
-			class DefaultReference
+			
+			Type reference()
 			{
-				public:
-					static WithReferenceProvider<T> *reference;
-			};
-					
+				return this;
+			}
+			
+			static WithReferenceProvider<T> *standard;	
 	};
 			
 	template<class T> class NoReferenceProvider
 	{
-		private:
-			NoReferenceProvider() {}
 		public:
-			typedef NoReferenceProvider *Reference;
-			typedef T ReferenceClass;
-			typedef NoReferenceProvider DefaultReference;
-
-			static NoReferenceProvider *reference;
-	};
-
-	template<typename T> NoReferenceProvider<T> *NoReferenceProvider<T>::reference = nullptr;
-
-	class StandardAllocator
-	{
-		public:
-			typedef NoReferenceProvider<StandardAllocator> ReferenceProvider;
-
-			StandardAllocator(ReferenceProvider *reference) {}
+			typedef NoReferenceProvider Ref;
+			typedef NoReferenceProvider *Type;
+			typedef T Storage;
 			
-			ReferenceProvider::Reference reference()
+			static Type standard;
+			
+			typename Ref::Type reference()
 			{
-				return ReferenceProvider::reference;
+				return Ref::standard;
 			}
 
+	};
+
+	template<typename T> NoReferenceProvider<T> *NoReferenceProvider<T>::standard = nullptr;
+
+	class StandardAllocator:
+		public NoReferenceProvider<StandardAllocator>
+	{
+		public:
+			StandardAllocator(Ref::Type reference) {}
+			StandardAllocator(const StandardAllocator &allocator) {}
+			
 			void *allocate(size_t bytes)
 			{
 				return std::malloc(bytes);

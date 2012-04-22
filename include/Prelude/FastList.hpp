@@ -17,7 +17,7 @@ namespace Prelude
 		
 		void append(T *node)
 		{
-			assert(node != 0);
+			prelude_debug_assert(node != 0);
 			
 			(node->*field).next = first;
 			first = node;

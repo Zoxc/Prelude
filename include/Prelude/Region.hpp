@@ -5,7 +5,8 @@
 
 namespace Prelude
 {
-	template<typename Allocator = StandardAllocator> class Region
+	template<typename Allocator = StandardAllocator> class Region:
+		public WithReferenceProvider<Region<Allocator>>
 	{
 		static const unsigned int max_alloc = 0x1000;
 
@@ -33,18 +34,8 @@ namespace Prelude
 				return result;
 			}
 		public:
-			typedef WithReferenceProvider<Region> ReferenceProvider;
-
-			ReferenceProvider reference;
-
-			Region(typename Allocator::ReferenceProvider::Reference allocator = Allocator::ReferenceProvider::DefaultReference::reference) : chunk_list(allocator), current(0), max(0)
+			Region(typename Allocator::Ref::Type allocator = Allocator::Ref::standard) : chunk_list(allocator), current(0), max(0)
 			{
-				reference.set(this);
-			}
-			
-			operator ReferenceProvider *()
-			{
-				return &reference;
 			}
 			
 			static const bool can_free = false;
