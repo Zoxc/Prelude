@@ -69,7 +69,7 @@ namespace Prelude
 				size_t size = (this->mask + 1) << 1;
 				size_t mask = size - 1;
 
-				Pair **table = (Pair **)allocator.allocate(size * sizeof(V));
+				Pair **table = (Pair **)allocator.allocate(size * sizeof(Pair *));
 				std::memset(table, 0, size * sizeof(Pair *));
 
 				Pair **end = this->table + (this->mask + 1);
@@ -115,8 +115,8 @@ namespace Prelude
 				size_t size = 1 << initial;
 				mask = size - 1;
 
-				table = (Pair **)this->allocator.allocate(size * sizeof(V));
-				memset(table, 0, size * sizeof(V));
+				table = (Pair **)this->allocator.allocate(size * sizeof(Pair *));
+				memset(table, 0, size * sizeof(Pair *));
 			}
 
 			~Map()
