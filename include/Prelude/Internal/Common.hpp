@@ -49,7 +49,8 @@ namespace Prelude
 	#define prelude_stringify(value) #value
 	#define prelude_runtime_abort_internal(file, line, message) Prelude::runtime_abort_with_message(file ":" prelude_stringify(line) ": " + std::string(message))
 	#define prelude_runtime_abort(message) prelude_runtime_abort_internal(__FILE__, __LINE__, message)
-
+	
+	static inline prelude_noreturn void runtime_abort_with_message(std::string message);
 	static inline void runtime_abort_with_message(std::string message)
 	{
 		std::cout << message << "\n";
