@@ -47,8 +47,8 @@ namespace Prelude
 	static const size_t memory_align = 8;
 
 	#define prelude_stringify(value) #value
-	#define prelude_runtime_abort_internal(expression, file, line, message) Prelude::runtime_abort_with_message(file ":" prelude_stringify(line) ": " + std::string(message))
-	#define prelude_runtime_abort(message) prelude_runtime_abort_internal(expression, __FILE__, __LINE__, message)
+	#define prelude_runtime_abort_internal(file, line, message) Prelude::runtime_abort_with_message(file ":" prelude_stringify(line) ": " + std::string(message))
+	#define prelude_runtime_abort(message) prelude_runtime_abort_internal(__FILE__, __LINE__, message)
 
 	static inline void runtime_abort_with_message(std::string message)
 	{
@@ -59,13 +59,13 @@ namespace Prelude
 	#ifdef _MSC_VER
 		#define prelude_runtime_assert(expression) assert(expression)
 	#else
-		#define prelude_runtime_assert_internal(expression, file, line) do { if(!expression) { std::cout << "Assertion failed: " #expression ", file " file ", line " prelude_stringify(line) "\n"; asm("int $3"); } } while(0)
+		#define prelude_runtime_assert_internal(expression, file, line) do { if(prelude_unlikely(!(expression))) { std::cout << "Assertion failed: " #expression ", file " file ", line " prelude_stringify(line) "\n"; asm("int $3"); } } while(0)
 		#define prelude_runtime_assert(expression) prelude_runtime_assert_internal(expression, __FILE__, __LINE__)
 	#endif
 
 	#ifdef DEBUG
 		#define prelude_debug_assert(expression) prelude_runtime_assert(expression)
-		#define prelude_debug_abort(message) prelude_runtime_abort_internal(expression, __FILE__, __LINE__, message)
+		#define prelude_debug_abort(message) prelude_runtime_abort_internal(__FILE__, __LINE__, message)
 	#else
 		#define prelude_debug_assert(expression)
 		#define prelude_debug_abort(message)
