@@ -31,12 +31,12 @@ namespace Prelude
 
 			LinkedListEntry<E> &entry = node->*field;
 			
-			if(mirb_likely(entry.prev != 0))
+			if(prelude_likely(entry.prev != 0))
 				(entry.prev->*field).next = entry.next;
 			else
 				first = static_cast<T *>(entry.next);
 
-			if(mirb_likely(entry.next != 0))
+			if(prelude_likely(entry.next != 0))
 				(entry.next->*field).prev = entry.prev;
 			else
 				last = static_cast<T *>(entry.prev);
