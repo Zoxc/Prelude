@@ -58,8 +58,12 @@ namespace Prelude
 	}
 	
 	#ifdef _MSC_VER
+		#define prelude_assume(cond) __assume(cond)	
+		#define prelude_unreachable() __assume(0)	
 		#define prelude_runtime_assert(expression) assert(expression)
 	#else
+		#define prelude_unreachable() __builtin_unreachable()
+		#define prelude_assume(cond)
 		#define prelude_runtime_assert_internal(expression, file, line) do { if(prelude_unlikely(!(expression))) { std::cout << "Assertion failed: " #expression ", file " file ", line " prelude_stringify(line) "\n"; asm("int $3"); } } while(0)
 		#define prelude_runtime_assert(expression) prelude_runtime_assert_internal(expression, __FILE__, __LINE__)
 	#endif
@@ -68,18 +72,10 @@ namespace Prelude
 		#define prelude_debug_assert(expression) prelude_runtime_assert(expression)
 		#define prelude_debug_abort(message) prelude_runtime_abort_internal(__FILE__, __LINE__, message)
 	#else
-		#define prelude_debug_assert(expression)
-		#define prelude_debug_abort(message)
+		#define prelude_debug_assert(expression) prelude_assume(expression)
+		#define prelude_debug_abort(message) prelude_unreachable()
 	#endif
 
-	#if !__has_builtin(__builtin_unreachable)
-		static inline void prelude_noreturn __builtin_unreachable();
-		static inline void __builtin_unreachable()
-		{
-			prelude_runtime_abort("Unreachable code");
-		}
-	#endif
-	
 	static inline size_t align(size_t value, size_t alignment)
 	{
 		alignment -= 1;
