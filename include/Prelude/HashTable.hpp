@@ -40,6 +40,10 @@ namespace Prelude
 			static void free_value(typename Allocator::Ref::Type allocator, V value)
 			{
 			}
+			
+			template<typename F> static void mark_value(V value, F mark)
+			{
+			}
 	};
 
 	template<class K, class V, class T, typename Allocator = StandardAllocator> class HashTable
@@ -174,6 +178,13 @@ namespace Prelude
 					
 					allocator.free(this->table);
 				}
+			}
+
+			template<typename F> void mark(F mark)
+			{
+				for(size_t i = 0; i <= entries; ++i)
+					if(T::valid_value(table[i]))
+						T::mark_value(table[i], mark);
 			}
 
 			V get(K key)
