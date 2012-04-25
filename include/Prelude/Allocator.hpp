@@ -78,19 +78,19 @@ namespace Prelude
 			StandardAllocator(Ref::Type reference) {}
 			StandardAllocator(const StandardAllocator &allocator) {}
 			
-			void *allocate(size_t bytes)
+			static void *allocate(size_t bytes)
 			{
 				return std::malloc(bytes);
 			}
 
-			void *reallocate(void *memory, size_t old, size_t bytes)
+			static void *reallocate(void *memory, size_t old, size_t bytes)
 			{
 				return std::realloc(memory, bytes);
 			}
 
 			static const bool can_free = true;
 
-			void free(void *memory)
+			static void free(void *memory)
 			{
 				return std::free(memory);
 			}
