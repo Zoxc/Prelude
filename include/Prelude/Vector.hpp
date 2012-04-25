@@ -16,8 +16,6 @@ namespace Prelude
 			{
 				if(_size + num > _capacity)
 				{
-					size_t old_capacity = _capacity;
-
 					if(table)
 					{
 						prelude_debug_assert(_size > 0);
@@ -28,7 +26,7 @@ namespace Prelude
 						}
 						while(_size + num > _capacity);
 
-						table = (T *)allocator.reallocate((void *)table, sizeof(T) * old_capacity, sizeof(T) * _capacity);
+						table = (T *)allocator.reallocate((void *)table, sizeof(T) * _size, sizeof(T) * _capacity);
 					}
 					else
 					{
