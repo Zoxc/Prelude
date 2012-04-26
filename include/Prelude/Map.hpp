@@ -4,9 +4,16 @@
 
 namespace Prelude
 {
-	template<class K, class V> class MapFunctions
+	template<class K, class V, typename Allocator = StandardAllocator> class MapFunctions
 	{
 		public:
+			struct Pair
+			{
+				K key;
+				Pair *next;
+				V value;
+			};
+			
 			static size_t hash_key(K key)
 			{
 				return (size_t)key;
@@ -16,18 +23,20 @@ namespace Prelude
 			{
 				return 0;
 			}
+			
+			static Pair *allocate_pair(typename Allocator::Ref::Type ref)
+			{
+				typename Allocator::Ref::Storage allocator(ref);
+
+				return new (allocator.allocate(sizeof(Pair))) Pair;
+			}
 	};
 
-	template<class K, class V, typename Allocator = StandardAllocator, class T = MapFunctions<K ,V> > class Map
+	template<class K, class V, typename Allocator = StandardAllocator, class T = MapFunctions<K, V, Allocator> > class Map
 	{
 		private:
-			struct Pair
-			{
-				K key;
-				Pair *next;
-				V value;
-			};
-
+			typedef typename T::Pair Pair;
+			
 			Pair **table;
 			typename Allocator::Ref::Storage allocator;
 			size_t mask;
@@ -51,7 +60,7 @@ namespace Prelude
 					pair = pair->next;
 				}
 				
-				pair = new (allocator.allocate(sizeof(Pair))) Pair;
+				pair = T::allocate_pair(allocator.reference());
 				pair->key = key;
 				pair->value = value;
 
@@ -196,20 +205,7 @@ namespace Prelude
 					Pair *pair = table[i];
 					
 					if(pair)
-						mark(*(void **)&table[i]);
-					
-					while(pair)
-					{
-						Pair *next =  pair->next;
-						
-						mark(pair->key);
-						mark(pair->value);
-						
-						if(next)
-							mark(*(void **)&pair->next);
-						
-						pair = next;
-					}
+						mark(table[i]);
 				}
 			}
 
@@ -234,7 +230,7 @@ namespace Prelude
 					pair = pair->next;
 				}
 				
-				pair = new (allocator.allocate(sizeof(Pair))) Pair;
+				pair = T::allocate_pair(allocator.reference());
 				pair->key = key;
 				pair->value = create_value();
 
@@ -295,7 +291,7 @@ namespace Prelude
 			
 			typename Allocator::Ref::Type get_allocator()
 			{
-				return allocator.get_reference();
+				return allocator.reference();
 			}
 	};
 };
