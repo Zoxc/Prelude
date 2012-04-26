@@ -189,6 +189,36 @@ namespace Prelude
 				}
 			}
 			
+			template<typename F> void mark_content(F mark)
+			{
+				for(size_t i = 0; i <= mask; ++i)
+				{
+					Pair *pair = table[i];
+					
+					if(pair)
+						mark(*(void **)&table[i]);
+					
+					while(pair)
+					{
+						Pair *next =  pair->next;
+						
+						mark(pair->key);
+						mark(pair->value);
+						
+						if(next)
+							mark(*(void **)&pair->next);
+						
+						pair = next;
+					}
+				}
+			}
+
+			template<typename F> void mark(F mark)
+			{
+				mark(*(void **)&table);
+				mark_content(mark);
+			}
+
 			template<typename func> V get_create(K key, func create_value)
 			{
 				size_t index = T::hash_key(key) & mask;

@@ -180,11 +180,18 @@ namespace Prelude
 				}
 			}
 
-			template<typename F> void mark(F mark)
+			template<typename F> void mark_content(F mark)
 			{
-				for(size_t i = 0; i <= entries; ++i)
+				for(size_t i = 0; i <= mask; ++i)
 					if(T::valid_value(table[i]))
 						T::mark_value(table[i], mark);
+						
+			}
+
+			template<typename F> void mark(F mark)
+			{
+				mark(*(void **)&table);
+				mark_content(mark);
 			}
 
 			V get(K key)
@@ -253,6 +260,21 @@ namespace Prelude
 					increase();
 
 				return exists;
+			}
+			
+			template<typename F> void each_value(F func)
+			{
+				for(size_t i = 0; i <= mask; ++i)
+				{
+					V entry = table[i];
+
+					while(T::valid_value(entry))
+					{
+						func(entry);
+						
+						entry = T::get_value_next(entry);
+					}
+				}
 			}
 			
 			typename Allocator::Ref::Type get_allocator()

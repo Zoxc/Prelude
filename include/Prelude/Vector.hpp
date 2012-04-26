@@ -143,10 +143,19 @@ namespace Prelude
 				return *this;
 			}
 			
-			template<typename F> void mark(F mark)
+			template<typename F> void mark_content(F mark)
 			{
 				for(size_t i = 0; i < _size; ++i)
 					mark(table[i]);
+			}
+
+			template<typename F> void mark(F mark)
+			{
+				if(table)
+				{
+					mark(*(void **)&table);
+					mark_content(mark);
+				}
 			}
 
 			size_t size() const
