@@ -196,6 +196,18 @@ namespace Prelude
 				return table[index];
 			}
 			
+			void clear()
+			{
+				_size = 0;
+				_capacity = 0;
+				
+				if(table)
+				{
+					allocator.free((void *)table);
+					table = 0;
+				}
+			}
+			
 			void push(T entry)
 			{
 				expand(1);
