@@ -1,10 +1,10 @@
 #pragma once
 #include "Internal/Common.hpp"
-#include "Allocator.hpp"
+#include "Allocator/Array.hpp"
 
 namespace Prelude
 {
-	template<class K, class V, typename Allocator = StandardAllocator> class HashTableFunctions
+	template<class K, class V, typename Allocator = Allocator::Standard> class HashTableFunctions
 	{
 		public:
 			static size_t hash_key(K key)
@@ -32,12 +32,12 @@ namespace Prelude
 				return false;
 			}
 
-			static V create_value(typename Allocator::Ref::Type allocator, K key)
+			static V create_value(typename Allocator::Reference allocator, K key)
 			{
 				return 0;
 			}
 			
-			static void free_value(typename Allocator::Ref::Type allocator, V value)
+			static void free_value(typename Allocator::Reference allocator, V value)
 			{
 			}
 			
@@ -46,15 +46,18 @@ namespace Prelude
 			}
 	};
 
-	template<class K, class V, class T, typename Allocator = StandardAllocator> class HashTable
+	template<class K, class V, class T, class BaseAllocator = Allocator::Standard, template<class, class> class ArrayWrapper = Allocator::Array> class HashTable
 	{
 		private:
-			V *table;
-			typename Allocator::Ref::Storage allocator;
+			typedef ArrayWrapper<V, BaseAllocator> Allocator;
+			typedef typename Allocator::Storage Table;
+			
+			Table table;
+			Allocator allocator;
 			size_t mask;
 			size_t entries;
 
-			bool store(V *table, size_t mask, K key, V value)
+			bool store(Table table, size_t mask, K key, V value)
 			{
 				size_t index = T::hash_key(key) & mask;
 				V entry = table[index];
@@ -98,8 +101,8 @@ namespace Prelude
 				size_t size = (this->mask + 1) << 1;
 				size_t mask = size - 1;
 
-				V *table = (V *)allocator.allocate(size * sizeof(V));
-				std::memset(table, 0, size * sizeof(V));
+				Table table = allocator.allocate(size);
+				std::memset(&table[0], 0, size * sizeof(V));
 
 				V *end = this->table + (this->mask + 1);
 
@@ -136,7 +139,7 @@ namespace Prelude
 		protected:
 			V* get_table()
 			{
-				return table;
+				return &table[0];
 			}
 
 			size_t get_size()
@@ -145,24 +148,24 @@ namespace Prelude
 			}
 
 		public:
-			HashTable(size_t initial, typename Allocator::Ref::Type allocator = Allocator::Ref::standard) : allocator(allocator)
+			HashTable(size_t initial, typename Allocator::Reference allocator = Allocator::default_reference) : allocator(allocator)
 			{
 				entries = 0;
 				
 				size_t size = 1 << initial;
 				mask = size - 1;
 
-				table = (V *)this->allocator.allocate(size * sizeof(V));
-				memset(table, 0, size * sizeof(V));
+				table = this->allocator.allocate(size);
+				memset(&table[0], 0, size * sizeof(V));
 			}
 
 			~HashTable()
 			{
 				if(Allocator::can_free)
 				{
-					V *end = this->table + (this->mask + 1);
+					V *end = &table[0] + (this->mask + 1);
 
-					for(V *slot = this->table; slot != end; ++slot)
+					for(V *slot = &table[0]; slot != end; ++slot)
 					{
 						V entry = *slot;
 
@@ -185,13 +188,12 @@ namespace Prelude
 				for(size_t i = 0; i <= mask; ++i)
 					if(T::valid_value(table[i]))
 						T::mark_value(table[i], mark);
-						
+			
 			}
 
 			template<typename F> void mark(F mark)
 			{
-				mark(*(void **)&table);
-				mark_content(mark);
+				mark(table);
 			}
 
 			V get(K key)
@@ -277,7 +279,7 @@ namespace Prelude
 				}
 			}
 			
-			typename Allocator::Ref::Type get_allocator()
+			typename Allocator::Base::Reference get_allocator()
 			{
 				return allocator.reference();
 			}

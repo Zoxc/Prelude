@@ -1,14 +1,16 @@
 #pragma once
 #include "Internal/Common.hpp"
-#include "Allocator.hpp"
+#include "Allocator/Array.hpp"
 
 namespace Prelude
 {
-	template<class T, class Allocator = Prelude::StandardAllocator> class Vector
+	template<class T, class BaseAllocator = Allocator::Standard, template<class, class> class ArrayWrapper = Allocator::Array> class Vector
 	{
 		protected:
-			T *table;
-			typename Allocator::Ref::Storage allocator;
+			typedef ArrayWrapper<T, BaseAllocator> Allocator;
+			
+			typename Allocator::Storage table;
+			Allocator allocator;
 			size_t _size;
 			size_t _capacity;
 
@@ -26,7 +28,7 @@ namespace Prelude
 						}
 						while(_size + num > _capacity);
 
-						table = (T *)allocator.reallocate((void *)table, sizeof(T) * _size, sizeof(T) * _capacity);
+						table = allocator.reallocate(table, _size, _capacity);
 					}
 					else
 					{
@@ -35,78 +37,67 @@ namespace Prelude
 						while(_size + num > _capacity)
 							_capacity <<= 1;
 						
-						table = (T *)allocator.allocate(sizeof(T) * _capacity);
+						table = allocator.allocate(_capacity);
 					}
 				}
 			}
 
-			template<typename Aother> void initialize_copy(const Vector<T, Aother>& other)
+			template<class Bother, template<class, class> class Aother> void initialize_copy(const Vector<T, Bother, Aother>& other)
 			{
 				_size = other.size();
 				_capacity = other.capacity();
 				
 				if(other.raw())
 				{
-					table = (T *)allocator.allocate(sizeof(T) * _capacity);
+					table = allocator.allocate(_capacity);
 
-					std::memcpy(table, other.raw(), sizeof(T) * _size);
+					std::memcpy((void *)raw(), (void *)other.raw(), sizeof(T) * _size);
 				}
 				else
 				{
-					table = 0;
+					table = nullptr;
 				}
 			}
 
 		public:
 			//TODO: Change; duplicate constructors here because of a Visual C++ bug
-			Vector(size_t initial)
+			/*Vector(size_t initial)
 			{
 				_size = 0;
 				_capacity = 1 << initial;
 				
-				table = (T *)this->allocator.allocate(sizeof(T) * _capacity);
+				table = this->allocator->allocate<T>(_capacity);
 			}
-			
-			Vector(size_t initial, typename Allocator::Ref::Type allocator) : allocator(allocator)
+			*/
+			Vector(size_t initial, typename Allocator::Reference allocator = Allocator::default_reference) : allocator(allocator)
 			{
 				_size = 0;
 				_capacity = 1 << initial;
 				
-				table = (T *)this->allocator.allocate(sizeof(T) * _capacity);
+				table = this->allocator.allocate(_capacity);
 			}
-			
+			/*
 			Vector()
 			{
 				_size = 0;
 				_capacity = 0;
-				table = 0;
+				table = nullptr;
 			}
-			
-			Vector(typename Allocator::Ref::Type allocator) : allocator(allocator)
+			*/
+			Vector(typename Allocator::Reference allocator = Allocator::default_reference) : allocator(allocator)
 			{
 				_size = 0;
 				_capacity = 0;
-				table = 0;
+				table = nullptr;
 			}
 			
 			Vector(const Vector &vector) :
-				allocator(vector.allocator),
-				_size(vector._size),
-				_capacity(vector._capacity)
+				allocator(vector.allocator)
 			{
-				if(vector.raw())
-				{
-					table = (T *)allocator.allocate(sizeof(T) * _capacity);
-
-					std::memcpy(table, vector.table, sizeof(T) * _size);
-				}
-				else
-				{
-					table = 0;
-				}
+				initialize_copy(vector);
 			}
 			
-			template<typename Aother> Vector(const Vector<T, Aother>& other, typename Allocator::Ref::Type allocator = Allocator::Ref::standard) : allocator(allocator)
+			template<class Bother, template<class, class> class Aother> Vector(const Vector<T, Bother, Aother>& other, typename Allocator::Reference allocator = Allocator::default_reference) : allocator(allocator)
 			{
 				initialize_copy(other);
 			}
@@ -114,7 +105,7 @@ namespace Prelude
 			~Vector()
 			{
 				if(table)
-					allocator.free((void *)table);
+					allocator.free(table);
 			}
 			
 			Vector &operator=(const Vector& other)
@@ -123,20 +114,20 @@ namespace Prelude
 					return *this;
 				
 				if(table)
-					allocator.free((void *)table);
+					allocator.free(table);
 				
 				initialize_copy(other);
 				
 				return *this;
 			}
 			
-			template<typename Aother> Vector &operator=(const Vector<T, Aother>& other)
+			template<class Bother, template<class, class> class Aother> Vector &operator=(const Vector<T, Bother, Aother>& other)
 			{
 				if(this == &other)
 					return *this;
 				
 				if(table)
-					allocator.free((void *)table);
+					allocator.free(table);
 				
 				initialize_copy(other);
 				
@@ -152,10 +143,7 @@ namespace Prelude
 			template<typename F> void mark(F mark)
 			{
 				if(table)
-				{
-					mark(*(void **)&table);
-					mark_content(mark);
-				}
+					mark(table);
 			}
 
 			size_t size() const
@@ -170,29 +158,34 @@ namespace Prelude
 			
 			const T &first() const
 			{
-				return *table;
-			}
-			
-			T *raw() const
-			{
-				return table;
+				prelude_debug_assert(_size > 0);
+				
+				return table[0];
 			}
 			
 			T &first()
 			{
 				prelude_debug_assert(_size > 0);
-				return *table;
+				
+				return table[0];
+			}
+			
+			T *raw() const
+			{
+				return &table[0];
 			}
 			
 			T &last()
 			{
 				prelude_debug_assert(_size > 0);
+				
 				return &table[_size - 1];
 			}
 			
 			T &operator [](size_t index)
 			{
 				prelude_debug_assert(index < _size);
+				
 				return table[index];
 			}
 			
@@ -203,8 +196,8 @@ namespace Prelude
 				
 				if(table)
 				{
-					allocator.free((void *)table);
-					table = 0;
+					allocator.free(table);
+					table = nullptr;
 				}
 			}
 			
@@ -228,7 +221,7 @@ namespace Prelude
 				if(!result)
 					return (size_t)-1;
 
-				return (size_t)(result - table) / sizeof(T);
+				return (size_t)(result - raw()) / sizeof(T);
 			}
 			
 			T *find(T entry)
@@ -342,17 +335,17 @@ namespace Prelude
 			
 			ReverseIterator rbegin()
 			{
-				return ReverseIterator(table + _size - 1);
+				return ReverseIterator(raw() + _size - 1);
 			}
 
 			ReverseIterator rend()
 			{
-				return ReverseIterator(table - 1);
+				return ReverseIterator(raw() - 1);
 			}
 
 			size_t index_of(Iterator &iter)
 			{
-				return (size_t)(iter.position() - table) / sizeof(T);
+				return (size_t)(iter.position() - raw()) / sizeof(T);
 			}
 	};
 };

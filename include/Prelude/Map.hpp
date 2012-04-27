@@ -1,10 +1,10 @@
 #pragma once
 #include "Internal/Common.hpp"
-#include "Allocator.hpp"
+#include "Allocator/Array.hpp"
 
 namespace Prelude
 {
-	template<class K, class V, typename Allocator = StandardAllocator> class MapFunctions
+	template<class K, class V> class MapFunctions
 	{
 		public:
 			struct Pair
@@ -24,25 +24,30 @@ namespace Prelude
 				return 0;
 			}
 			
-			static Pair *allocate_pair(typename Allocator::Ref::Type ref)
+			template<typename Allocator> static Pair *allocate_pair(typename Allocator::Reference ref)
 			{
-				typename Allocator::Ref::Storage allocator(ref);
-
-				return new (allocator.allocate(sizeof(Pair))) Pair;
+				return new (Allocator(ref).allocate(sizeof(Pair))) Pair;
+			}
+			
+			template<typename Allocator> static void free_pair(typename Allocator::Reference ref, Pair *pair)
+			{
+				Allocator(ref).free((void *)pair);
 			}
 	};
 
-	template<class K, class V, typename Allocator = StandardAllocator, class T = MapFunctions<K, V, Allocator> > class Map
+	template<class K, class V, class T = MapFunctions<K, V>, class BaseAllocator = Allocator::Standard, template<class, class> class ArrayWrapper = Allocator::Array> class Map
 	{
 		private:
+			typedef ArrayWrapper<typename T::Pair *, BaseAllocator> Allocator;
 			typedef typename T::Pair Pair;
+			typedef typename Allocator::Storage Table;
 			
-			Pair **table;
-			typename Allocator::Ref::Storage allocator;
+			Table table;
+			Allocator allocator;
 			size_t mask;
 			size_t entries;
 			
-			bool store(Pair **table, size_t mask, K key, V value)
+			bool store(Table table, size_t mask, K key, V value)
 			{
 				size_t index = T::hash_key(key) & mask;
 				Pair *pair = table[index];
@@ -60,7 +65,7 @@ namespace Prelude
 					pair = pair->next;
 				}
 				
-				pair = T::allocate_pair(allocator.reference());
+				pair = T::template allocate_pair<BaseAllocator>(allocator.reference());
 				pair->key = key;
 				pair->value = value;
 
@@ -79,10 +84,11 @@ namespace Prelude
 				size_t size = (this->mask + 1) << 1;
 				size_t mask = size - 1;
 
-				Pair **table = (Pair **)allocator.allocate(size * sizeof(Pair *));
-				std::memset(table, 0, size * sizeof(Pair *));
+				Table table = allocator.allocate(size);
+				
+				std::memset(&table[0], 0, size * sizeof(Pair *));
 
-				Pair **end = this->table + (this->mask + 1);
+				Pair **end = &this->table[0] + (this->mask + 1);
 
 				for(Pair **slot = this->table; slot != end; ++slot)
 				{
@@ -94,7 +100,7 @@ namespace Prelude
 
 						store(table, mask, pair->key, pair->value);
 						
-						allocator.free(pair);
+						T::template free_pair<BaseAllocator>(allocator.reference(), pair);
 
 						pair = next;
 					}
@@ -118,24 +124,24 @@ namespace Prelude
 			typedef K Key;
 			typedef V Value;
 
-			Map(size_t initial, typename Allocator::Ref::Type allocator = Allocator::Ref::standard) : allocator(allocator)
+			Map(size_t initial, typename Allocator::Reference allocator = Allocator::default_reference) : allocator(allocator)
 			{
 				entries = 0;
 
 				size_t size = 1 << initial;
 				mask = size - 1;
 
-				table = (Pair **)this->allocator.allocate(size * sizeof(Pair *));
-				memset(table, 0, size * sizeof(Pair *));
+				table = this->allocator.allocate(size);
+				std::memset(&table[0], 0, size * sizeof(Pair *));
 			}
 
 			~Map()
 			{
 				if(Allocator::can_free)
 				{
-					Pair **end = this->table + this->mask + 1;
+					Pair **end = &table[0] + mask + 1;
 
-					for(Pair **slot = this->table; slot != end; ++slot)
+					for(Pair **slot = &table[0]; slot != end; ++slot)
 					{
 						Pair *pair = *slot;
 
@@ -143,13 +149,13 @@ namespace Prelude
 						{
 							Pair *next = pair->next;
 
-							allocator.free(pair);
+							T::template free_pair<typename Allocator::Base>(allocator.reference(), pair);
 
 							pair = next;
 						}
 					}
 
-					allocator.free(this->table);
+					allocator.free(table);
 				}
 			}
 
@@ -211,8 +217,7 @@ namespace Prelude
 
 			template<typename F> void mark(F mark)
 			{
-				mark(*(void **)&table);
-				mark_content(mark);
+				mark(table);
 			}
 
 			template<typename func> V get_create(K key, func create_value)
@@ -289,7 +294,7 @@ namespace Prelude
 					increase();
 			}
 			
-			typename Allocator::Ref::Type get_allocator()
+			typename Allocator::Reference get_allocator()
 			{
 				return allocator.reference();
 			}
