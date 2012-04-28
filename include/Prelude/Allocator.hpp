@@ -28,7 +28,7 @@ namespace Prelude
 			private:
 				T &allocator;
 			public:
-				ReferenceTemplate(const T &allocator) : allocator(allocator) {}
+				ReferenceTemplate(T &allocator) : allocator(allocator) {}
 				ReferenceTemplate(ReferenceTemplate *reference) : allocator(*(T *)(reference)) {}
 				ReferenceTemplate(const ReferenceTemplate &provider) : allocator(provider.allocator) {}
 				
