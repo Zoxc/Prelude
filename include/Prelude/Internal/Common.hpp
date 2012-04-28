@@ -53,20 +53,22 @@ namespace Prelude
 	static inline prelude_noreturn void runtime_abort_with_message(std::string message);
 	static inline void runtime_abort_with_message(std::string message)
 	{
-		std::cout << message << "\n";
+		std::cout << message << std::endl;
 		std::abort();
 	}
 	
 	#ifdef _MSC_VER
+		#define prelude_nonnull(...)
 		#define prelude_align(pre, name, value) __declspec(align(value)) pre name
 		#define prelude_assume(cond) __assume(cond)	
 		#define prelude_unreachable() __assume(0)	
 		#define prelude_runtime_assert(expression) assert(expression)
 	#else
+		#define prelude_nonnull(...) __attribute__((nonnull(__VA_ARGS__)))
 		#define prelude_align(pre, name, value) pre __attribute__((aligned(value))) name
 		#define prelude_unreachable() __builtin_unreachable()
 		#define prelude_assume(cond)
-		#define prelude_runtime_assert_internal(expression, file, line) do { if(prelude_unlikely(!(expression))) { std::cout << "Assertion failed: " #expression ", file " file ", line " prelude_stringify(line) "\n"; asm("int $3"); } } while(0)
+		#define prelude_runtime_assert_internal(expression, file, line) do { if(prelude_unlikely(!(expression))) runtime_abort_with_message("Assertion failed: " #expression ", file " file ", line " prelude_stringify(line)); } while(0)
 		#define prelude_runtime_assert(expression) prelude_runtime_assert_internal(expression, __FILE__, __LINE__)
 	#endif
 
