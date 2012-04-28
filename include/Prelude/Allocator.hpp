@@ -26,15 +26,26 @@ namespace Prelude
 			public ReferenceTemplateBase<ReferenceTemplate<T>, T>
 		{
 			private:
-				T &allocator;
+				T *allocator;
 			public:
-				ReferenceTemplate(T &allocator) : allocator(allocator) {}
-				ReferenceTemplate(ReferenceTemplate *reference) : allocator(*(T *)(reference)) {}
-				ReferenceTemplate(const ReferenceTemplate &provider) : allocator(provider.allocator) {}
-				
+				ReferenceTemplate(T &allocator) : allocator(&allocator) {}
+				ReferenceTemplate(ReferenceTemplate *reference) : allocator((T *)reference) {}
+
+				ReferenceTemplate &operator =(ReferenceTemplate *allocator)
+				{
+					this->allocator = (T *)allocator;
+
+					return *this;
+				}
+
+				T *base()
+				{
+					return allocator;
+				}
+
 				ReferenceTemplate *reference()
 				{
-					return (ReferenceTemplate *)&allocator;
+					return (ReferenceTemplate *)allocator;
 				}
 				
 				operator ReferenceTemplate *()
@@ -44,17 +55,17 @@ namespace Prelude
 				
 				void *allocate(size_t bytes)
 				{
-					return allocator.allocate(bytes);
+					return allocator->allocate(bytes);
 				}
 				
 				void *reallocate(void *memory, size_t old_size, size_t new_size)
 				{
-					return allocator.reallocate(memory, old_size, new_size);
+					return allocator->reallocate(memory, old_size, new_size);
 				}
 		
 				void free(void *memory)
 				{
-					return allocator.free(memory);
+					return allocator->free(memory);
 				}
 		};
 		
@@ -74,8 +85,8 @@ namespace Prelude
 			public:
 				Template(const T &) {}
 				Template(Template *reference) {}
-				Template(const Template &provider) {}
-				
+				Template &operator =(Template *reference) {}
+
 				Template *reference()
 				{
 					return Template::default_reference;

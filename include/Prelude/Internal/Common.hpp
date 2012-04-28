@@ -58,12 +58,12 @@ namespace Prelude
 	}
 	
 	#ifdef _MSC_VER
-		#define prelude_align(value) __declspec(align(value))
+		#define prelude_align(pre, name, value) __declspec(align(value)) pre name
 		#define prelude_assume(cond) __assume(cond)	
 		#define prelude_unreachable() __assume(0)	
 		#define prelude_runtime_assert(expression) assert(expression)
 	#else
-		#define prelude_align(value) __attribute__((aligned(value)))
+		#define prelude_align(pre, name, value) pre __attribute__((aligned(value))) name
 		#define prelude_unreachable() __builtin_unreachable()
 		#define prelude_assume(cond)
 		#define prelude_runtime_assert_internal(expression, file, line) do { if(prelude_unlikely(!(expression))) { std::cout << "Assertion failed: " #expression ", file " file ", line " prelude_stringify(line) "\n"; asm("int $3"); } } while(0)

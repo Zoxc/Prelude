@@ -90,7 +90,7 @@ namespace Prelude
 
 				Pair **end = &this->table[0] + (this->mask + 1);
 
-				for(Pair **slot = this->table; slot != end; ++slot)
+				for(Pair **slot = &this->table[0]; slot != end; ++slot)
 				{
 					Pair *pair = *slot;
 

@@ -28,8 +28,14 @@ namespace Prelude
 				}
 				
 				Array(typename Allocator::Reference allocator = Allocator::default_reference) : allocator(allocator) {}
-				Array(const Array &array_allocator) : allocator(allocator) {}
-				
+
+				Array &operator =(typename Allocator::Reference allocator)
+				{
+					this->allocator = allocator;
+
+					return *this;
+				}
+
 				typedef A *Storage;
 				
 				Storage allocate(size_t size)
