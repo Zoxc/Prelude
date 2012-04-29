@@ -86,7 +86,8 @@ namespace Prelude
 
 				Table table = allocator.allocate(size);
 				
-				std::memset(&table[0], 0, size * sizeof(Pair *));
+				if(!Allocator::null_references)
+					std::memset(&table[0], 0, size * sizeof(Pair *));
 
 				Pair **end = &this->table[0] + (this->mask + 1);
 
@@ -132,7 +133,9 @@ namespace Prelude
 				mask = size - 1;
 
 				table = this->allocator.allocate(size);
-				std::memset(&table[0], 0, size * sizeof(Pair *));
+				
+				if(!Allocator::null_references)
+					std::memset(&table[0], 0, size * sizeof(Pair *));
 			}
 
 			~Map()

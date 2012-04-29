@@ -102,7 +102,9 @@ namespace Prelude
 				size_t mask = size - 1;
 
 				Table table = allocator.allocate(size);
-				std::memset(&table[0], 0, size * sizeof(V));
+				
+				if(!Allocator::null_references)
+					std::memset(&table[0], 0, size * sizeof(V));
 
 				V *end = this->table + (this->mask + 1);
 
@@ -156,7 +158,9 @@ namespace Prelude
 				mask = size - 1;
 
 				table = this->allocator.allocate(size);
-				memset(&table[0], 0, size * sizeof(V));
+				
+				if(!Allocator::null_references)
+					memset(&table[0], 0, size * sizeof(V));
 			}
 
 			~HashTable()

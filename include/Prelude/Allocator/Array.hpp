@@ -38,6 +38,10 @@ namespace Prelude
 
 				typedef A *Storage;
 				
+				void null(A &ref)
+				{
+				}
+				
 				Storage allocate(size_t size)
 				{
 					return (A *)allocator.allocate(sizeof(A) * size);

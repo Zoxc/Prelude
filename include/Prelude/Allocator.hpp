@@ -12,6 +12,7 @@ namespace Prelude
 			typedef Ref *Reference;
 			
 			static const bool can_free = Ent::can_free;
+			static const bool null_references = Ent::null_references;
 		};
 
 		template<class Ref, class Ent> struct ReferenceTemplateBase:
@@ -126,6 +127,7 @@ namespace Prelude
 			}
 
 			static const bool can_free = true;
+			static const bool null_references = false;
 
 			static void free(void *memory)
 			{

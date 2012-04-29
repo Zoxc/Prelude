@@ -60,15 +60,6 @@ namespace Prelude
 			}
 
 		public:
-			//TODO: Change; duplicate constructors here because of a Visual C++ bug
-			/*Vector(size_t initial)
-			{
-				_size = 0;
-				_capacity = 1 << initial;
-				
-				table = this->allocator->allocate<T>(_capacity);
-			}
-			*/
 			Vector(size_t initial, typename Allocator::Reference allocator = Allocator::default_reference) : allocator(allocator)
 			{
 				_size = 0;
@@ -76,14 +67,7 @@ namespace Prelude
 				
 				table = this->allocator.allocate(_capacity);
 			}
-			/*
-			Vector()
-			{
-				_size = 0;
-				_capacity = 0;
-				table = nullptr;
-			}
-			*/
+
 			Vector(typename Allocator::Reference allocator = Allocator::default_reference) : allocator(allocator)
 			{
 				_size = 0;
@@ -211,7 +195,23 @@ namespace Prelude
 			T pop()
 			{
 				prelude_debug_assert(_size);
-				return table[--_size];
+				
+				size_t new_size = _size - 1;
+				
+				T result = table[new_size];
+				
+				if(new_size == 0)
+				{
+					_capacity = 0;
+					allocator.free(table);
+					table = nullptr;
+				}
+				else
+					allocator.null(table[new_size]);
+					
+				_size = new_size;
+				
+				return result;
 			}
 			
 			size_t index_of(T entry)
