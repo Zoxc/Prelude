@@ -38,7 +38,7 @@ namespace Prelude
 
 				typedef A *Storage;
 				
-				void null(A &ref)
+				void null(A &)
 				{
 				}
 				

@@ -32,12 +32,12 @@ namespace Prelude
 				return false;
 			}
 
-			static V create_value(typename Allocator::Reference allocator, K key)
+			static V create_value(typename Allocator::Reference, K)
 			{
 				return 0;
 			}
 			
-			static void free_value(typename Allocator::Reference allocator, V value)
+			static void free_value(typename Allocator::Reference, V)
 			{
 			}
 			

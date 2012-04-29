@@ -85,8 +85,8 @@ namespace Prelude
 		{
 			public:
 				Template(const T &) {}
-				Template(Template *reference) {}
-				Template &operator =(Template *reference) {}
+				Template(Template *) {}
+				Template &operator =(Template *) {}
 
 				Template *reference()
 				{
@@ -121,7 +121,7 @@ namespace Prelude
 				return std::malloc(bytes);
 			}
 
-			static void *reallocate(void *memory, size_t old, size_t bytes)
+			static void *reallocate(void *memory, size_t, size_t bytes)
 			{
 				return std::realloc(memory, bytes);
 			}
