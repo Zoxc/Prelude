@@ -22,7 +22,7 @@ namespace Prelude
 			{
 				void *result = allocator.allocate(bytes + sizeof(Chunk));
 				
-				assert(result && "No memory was allocated.");
+				prelude_runtime_assert(result && "No memory was allocated.");
 				
 				Chunk *chunk = new (result) Chunk;
 				
@@ -39,7 +39,7 @@ namespace Prelude
 				{
 					Chunk *current = *chunk;
 					++chunk;
-					free(current);
+					allocator.free(current);
 				};
 			}
 	};

@@ -58,7 +58,7 @@ namespace Prelude
 			
 			void *reallocate(void *memory, size_t old_size, size_t new_size)
 			{
-				// TODO: Check if this was the previous memory block allocate and try to expand the area.
+				// TODO: Check if this was the previous memory block allocated and try to expand the area.
 
 				void *result = allocate(new_size);
 				
