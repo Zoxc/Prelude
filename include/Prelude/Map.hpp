@@ -194,7 +194,7 @@ namespace Prelude
 				return fails();
 			}
 			
-			template<typename func> void each_pair(func do_for_pair)
+			template<typename func> bool each_pair(func do_for_pair)
 			{
 				for(size_t i = 0; i <= mask; ++i)
 				{
@@ -202,9 +202,12 @@ namespace Prelude
 
 					if(pair)
 					{
-						do_for_pair(pair->key, pair->value);
+						if(!do_for_pair(pair->key, pair->value))
+							return false;
 					}
 				}
+				
+				return true;
 			}
 			
 			template<typename F> void mark_content(F mark)
