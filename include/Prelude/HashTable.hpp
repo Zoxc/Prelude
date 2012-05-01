@@ -32,7 +32,7 @@ namespace Prelude
 				return false;
 			}
 
-			static V create_value(typename Allocator::Reference, K)
+			static V create_value(typename Allocator::Reference, K, size_t)
 			{
 				return 0;
 			}
@@ -59,13 +59,14 @@ namespace Prelude
 
 			bool store(Table table, size_t mask, K key, V value)
 			{
-				size_t index = T::hash_key(key) & mask;
+				size_t hash = T::hash_key(key);
+				size_t index = hash & mask;
 				V entry = table[index];
 				V tail = entry;
 
 				while(T::valid_value(entry))
 				{
-					if(T::compare_key_value(key, entry))
+					if(T::compare_key_value(key, hash, entry))
 					{
 						if(T::valid_value(tail))
 						{
@@ -205,13 +206,14 @@ namespace Prelude
 				if(prelude_unlikely(!T::valid_key(key)))
 					return 0;
 
-				size_t index = T::hash_key(key) & mask;
+				size_t hash = T::hash_key(key);
+				size_t index = hash & mask;
 				V entry = table[index];
 				V tail = entry;
 
 				while(T::valid_value(entry))
 				{
-					if(T::compare_key_value(key, entry))
+					if(T::compare_key_value(key, hash, entry))
 						return entry;
 
 					tail = entry;
@@ -220,7 +222,7 @@ namespace Prelude
 
 				if(T::create_value())
 				{
-					V value = T::create_value(get_allocator(), key);
+					V value = T::create_value(get_allocator(), key, hash);
 
 					if(tail)
 						T::set_value_next(tail, value);
@@ -244,12 +246,13 @@ namespace Prelude
 			
 			bool has(K key)
 			{
-				size_t index = T::hash_key(key) & mask;
+				size_t hash = T::hash_key(key);
+				size_t index = hash & mask;
 				V entry = table[index];
 
 				while(T::valid_value(entry))
 				{
-					if(T::compare_key_value(key, entry))
+					if(T::compare_key_value(key, hash, entry))
 						return true;
 					
 					entry = T::get_value_next(entry);
