@@ -16,7 +16,7 @@ namespace Prelude
 
 			void expand(size_t num)
 			{
-				if(_size + num > _capacity)
+				if(prelude_unlikely(_size + num > _capacity))
 				{
 					if(table)
 					{
@@ -185,6 +185,29 @@ namespace Prelude
 				}
 			}
 			
+			void push_entries_front(T *entries, size_t count)
+			{
+				expand(count);
+				
+				for(size_t i = _size; i-- > 0;)
+					table[i + count] = table[i];
+
+				for(size_t i = 0; i < count; ++i)
+					table[i] = entries[i];
+					
+				_size += count;
+			}
+			
+			void push_entries(T *entries, size_t count)
+			{
+				expand(count);
+
+				for(size_t i = 0; i < count; ++i)
+					table[_size + i] = entries[i];
+				
+				_size += count;
+			}
+			
 			void push(T entry)
 			{
 				expand(1);
@@ -222,6 +245,17 @@ namespace Prelude
 					return (size_t)-1;
 
 				return (size_t)(result - raw()) / sizeof(T);
+			}
+			
+			template<typename F> bool each(F func)
+			{
+				for(size_t i = 0; i < _size; ++i)
+				{
+					if(!func(table[i]))
+						return false;
+				}
+				
+				return true;
 			}
 			
 			T *find(T entry)
