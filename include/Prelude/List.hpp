@@ -24,6 +24,17 @@ namespace Prelude
 			first = 0;
 			last = 0;
 		}
+	
+		template<typename F> T *find(F func)
+		{
+			for(auto i = begin(); i != end(); ++i)
+			{
+				if(func(*i))
+					return *i;
+			}
+			
+			return nullptr;
+		}
 		
 		bool empty()
 		{
@@ -176,7 +187,7 @@ namespace Prelude
 					list.first = node;
 				
 				if(this->current)
-					(node->*field).next = (this->current->*field).next; 
+					(node->*field).next = this->current; 
 				else
 				{
 					list.last = node;

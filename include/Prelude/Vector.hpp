@@ -258,6 +258,17 @@ namespace Prelude
 				return true;
 			}
 			
+			template<typename F> T find(F func, T default_value)
+			{
+				for(size_t i = 0; i < _size; ++i)
+				{
+					if(func(table[i]))
+						return table[i];
+				}
+				
+				return default_value;
+			}
+			
 			T *find(T entry)
 			{
 				for(auto i = begin(); i != end(); ++i)
