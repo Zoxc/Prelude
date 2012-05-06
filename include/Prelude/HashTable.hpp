@@ -26,6 +26,10 @@ namespace Prelude
 			{
 				return value != 0;
 			}
+			
+			static void verify_value(V value)
+			{
+			}
 
 			static bool create_value()
 			{
@@ -57,20 +61,27 @@ namespace Prelude
 			size_t mask;
 			size_t entries;
 
-			bool store(Table table, size_t mask, K key, V value)
+			static bool store(Table table, size_t mask, K key, V value)
 			{
+				T::verify_value(value);
+
 				size_t hash = T::hash_key(key);
 				size_t index = hash & mask;
 				V entry = table[index];
 				V tail = entry;
+				
+				T::verify_value(entry);
 
 				while(T::valid_value(entry))
 				{
+					T::verify_value(entry);
+
 					if(T::compare_key_value(key, hash, entry))
 					{
 						if(T::valid_value(tail))
 						{
 							V next = T::get_value_next(entry);
+							T::verify_value(next);
 							T::set_value_next(tail, value);
 							T::set_value_next(value, next);
 						}
@@ -86,6 +97,8 @@ namespace Prelude
 					tail = entry;
 					entry = T::get_value_next(entry);
 				}
+				
+				T::verify_value(value);
 
 				if(T::valid_value(tail))
 					T::set_value_next(tail, value);
@@ -105,22 +118,23 @@ namespace Prelude
 				Table table = allocator.allocate(size);
 				
 				if(!Allocator::null_references)
-					std::memset(&table[0], 0, size * sizeof(V));
-
+					for(size_t i = 0; i < size; ++i)
+						table[i] = T::invalid_value();
+				
 				V *end = this->table + (this->mask + 1);
-
+				
 				for(V *slot = this->table; slot != end; ++slot)
 				{
 					V entry = *slot;
 
 					while(T::valid_value(entry))
 					{
+						T::verify_value(entry);
+
 						V next = T::get_value_next(entry);
-
+						
 						store(table, mask, T::get_key(entry), entry);
-
-						T::free_value(get_allocator(), entry);
-
+						
 						entry = next;
 					}
 				}
@@ -213,6 +227,8 @@ namespace Prelude
 
 				while(T::valid_value(entry))
 				{
+					T::verify_value(entry);
+
 					if(T::compare_key_value(key, hash, entry))
 						return entry;
 
@@ -252,6 +268,8 @@ namespace Prelude
 
 				while(T::valid_value(entry))
 				{
+					T::verify_value(entry);
+
 					if(T::compare_key_value(key, hash, entry))
 						return true;
 					
@@ -279,6 +297,8 @@ namespace Prelude
 
 					while(T::valid_value(entry))
 					{
+						T::verify_value(entry);
+
 						func(entry);
 						
 						entry = T::get_value_next(entry);

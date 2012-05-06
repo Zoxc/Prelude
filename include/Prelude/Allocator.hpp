@@ -118,12 +118,20 @@ namespace Prelude
 		{
 			static void *allocate(size_t bytes)
 			{
-				return std::malloc(bytes);
+				void *result = std::malloc(bytes);
+				
+				prelude_runtime_assert(result);
+				
+				return result;
 			}
 
 			static void *reallocate(void *memory, size_t, size_t bytes)
 			{
-				return std::realloc(memory, bytes);
+				void *result = std::realloc(memory, bytes);
+				
+				prelude_runtime_assert(result);
+				
+				return result;
 			}
 
 			static const bool can_free = true;
@@ -131,7 +139,7 @@ namespace Prelude
 
 			static void free(void *memory)
 			{
-				return std::free(memory);
+				std::free(memory);
 			}
 		};
 		
