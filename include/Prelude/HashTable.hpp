@@ -27,7 +27,7 @@ namespace Prelude
 				return value != 0;
 			}
 			
-			static void verify_value(V value)
+			static void verify_value(V)
 			{
 			}
 
