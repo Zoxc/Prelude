@@ -173,6 +173,13 @@ namespace Prelude
 				return table[index];
 			}
 			
+			const T &operator [](size_t index) const
+			{
+				prelude_debug_assert(index < _size);
+				
+				return table[index];
+			}
+			
 			void clear()
 			{
 				_size = 0;
@@ -183,6 +190,23 @@ namespace Prelude
 					allocator.free(table);
 					table = nullptr;
 				}
+			}
+			
+			bool expand_to(size_t size, T filler)
+			{
+				if(_size < size)
+				{
+					expand(size - _size);
+					
+					for(size_t i = _size; i < size - 1; ++i)
+						table[i] = filler;
+						
+					_size = size;
+					
+					return true;
+				}
+				else
+					return false;
 			}
 			
 			void push_entries_front(T *entries, size_t count)
@@ -204,6 +228,18 @@ namespace Prelude
 
 				for(size_t i = 0; i < count; ++i)
 					table[_size + i] = entries[i];
+				
+				_size += count;
+			}
+			
+			template<class Bother, template<class, class> class Aother> void push(const Vector<T, Bother, Aother>& other)
+			{
+				size_t count = other.size();
+				
+				expand(count);
+				
+				for(size_t i = 0; i < count; ++i)
+					table[_size + i] = other[i];
 				
 				_size += count;
 			}
