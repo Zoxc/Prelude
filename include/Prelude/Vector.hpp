@@ -209,6 +209,18 @@ namespace Prelude
 					return false;
 			}
 			
+			T shift()
+			{
+				T result = first();
+				
+				for(size_t i = 0; i < _size - 1; ++i)
+					table[i] = table[i + 1];
+				
+				_size -= 1;
+
+				return result;
+			}
+			
 			void push_entries_front(T *entries, size_t count)
 			{
 				expand(count);
