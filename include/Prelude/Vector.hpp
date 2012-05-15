@@ -47,7 +47,7 @@ namespace Prelude
 				_size = other.size();
 				_capacity = other.capacity();
 				
-				if(other.raw())
+				if(_size)
 				{
 					table = allocator.allocate(_capacity);
 
