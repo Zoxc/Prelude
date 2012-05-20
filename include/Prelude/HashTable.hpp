@@ -45,7 +45,7 @@ namespace Prelude
 			{
 			}
 			
-			template<typename F> static void mark_value(V value, F mark)
+			template<typename F> static void mark_value(V, F)
 			{
 			}
 	};
