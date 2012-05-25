@@ -40,13 +40,15 @@
 	#define prelude_likely(x) (x)
 	#define prelude_unlikely(x) (x)
 	#define prelude_memory_barrier() MemoryBarrier()
-    #define prelude_use_result
+	#define prelude_use_result
+	#define prelude_thread __declspec(thread)
 #else
+	#define prelude_thread __thread
 	#define prelude_nonnull(...) __attribute__((nonnull(__VA_ARGS__)))
 	#define prelude_align(pre, name, value) pre __attribute__((aligned(value))) name
 	#define prelude_unreachable() __builtin_unreachable()
 	#define prelude_assume(cond)
-    #define prelude_use_result __attribute__((warn_unused_result))
+	#define prelude_use_result __attribute__((warn_unused_result))
 	#define prelude_memory_barrier() __sync_synchronize()
 	#define prelude_unused __attribute__((unused)) 
 	#define prelude_noreturn __attribute__((noreturn)) 
