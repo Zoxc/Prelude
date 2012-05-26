@@ -14,34 +14,6 @@ namespace Prelude
 			size_t _size;
 			size_t _capacity;
 
-			void expand(size_t num)
-			{
-				if(prelude_unlikely(_size + num > _capacity))
-				{
-					if(table)
-					{
-						prelude_debug_assert(_size > 0);
-
-						do
-						{
-							_capacity <<= 1;
-						}
-						while(_size + num > _capacity);
-
-						table = allocator.reallocate(table, _size, _capacity);
-					}
-					else
-					{
-						_capacity = 1;
-
-						while(_size + num > _capacity)
-							_capacity <<= 1;
-						
-						table = allocator.allocate(_capacity);
-					}
-				}
-			}
-
 			template<class Bother, template<class, class> class Aother> void initialize_copy(const Vector<T, Bother, Aother>& other)
 			{
 				_size = other.size();
@@ -118,6 +90,34 @@ namespace Prelude
 				return *this;
 			}
 			
+			void expand(size_t num)
+			{
+				if(prelude_unlikely(_size + num > _capacity))
+				{
+					if(table)
+					{
+						prelude_debug_assert(_size > 0);
+
+						do
+						{
+							_capacity <<= 1;
+						}
+						while(_size + num > _capacity);
+
+						table = allocator.reallocate(table, _size, _capacity);
+					}
+					else
+					{
+						_capacity = 1;
+
+						while(_size + num > _capacity)
+							_capacity <<= 1;
+						
+						table = allocator.allocate(_capacity);
+					}
+				}
+			}
+
 			template<typename F> void mark_content(F mark)
 			{
 				for(size_t i = 0; i < _size; ++i)
