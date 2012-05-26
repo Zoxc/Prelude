@@ -221,6 +221,16 @@ namespace Prelude
 				return result;
 			}
 			
+			void remove(size_t index)
+			{
+				prelude_debug_assert(index < _size);
+				
+				_size -= 1;
+
+				for(size_t i = index; i < _size; ++i)
+					table[i] = table[i + 1];
+			}
+			
 			void push_entries_front(T *entries, size_t count)
 			{
 				expand(count);
