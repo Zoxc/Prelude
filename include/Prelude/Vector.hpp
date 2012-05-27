@@ -217,6 +217,8 @@ namespace Prelude
 					table[i] = table[i + 1];
 				
 				_size -= 1;
+				
+				allocator.null(table[_size]);
 
 				return result;
 			}
@@ -229,6 +231,8 @@ namespace Prelude
 
 				for(size_t i = index; i < _size; ++i)
 					table[i] = table[i + 1];
+					
+				allocator.null(table[_size]);
 			}
 			
 			void push_entries_front(T *entries, size_t count)
