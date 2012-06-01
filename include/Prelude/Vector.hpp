@@ -47,6 +47,13 @@ namespace Prelude
 				table = nullptr;
 			}
 			
+			Vector(Vector &&vector) :
+				allocator(vector.allocator),
+				_size(vector._size),
+				_capacity(vector._capacity)
+			{
+			}
+			
 			Vector(const Vector &vector) :
 				allocator(vector.allocator)
 			{
