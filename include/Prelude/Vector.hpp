@@ -313,7 +313,7 @@ namespace Prelude
 				if(!result)
 					return (size_t)-1;
 
-				return (size_t)(result - raw()) / sizeof(T);
+				return (size_t)(result - raw());
 			}
 			
 			template<typename F> bool each(F func)
