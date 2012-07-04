@@ -124,6 +124,19 @@ namespace Prelude
 		public:
 			typedef K Key;
 			typedef V Value;
+			
+			Map(typename Allocator::Reference allocator = Allocator::default_reference) : allocator(allocator)
+			{
+				entries = 0;
+
+				size_t size = 1 << initial;
+				mask = size - 1;
+
+				table = this->allocator.allocate(size);
+				
+				if(!Allocator::null_references)
+					std::memset(&table[0], 0, size * sizeof(Pair *));
+			}
 
 			Map(size_t initial, typename Allocator::Reference allocator = Allocator::default_reference) : allocator(allocator)
 			{

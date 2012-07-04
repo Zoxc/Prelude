@@ -30,7 +30,9 @@
 #endif
 
 #ifdef _MSC_VER
-	#define WIN32 1
+	#ifndef WIN32
+		#define WIN32 1
+	#endif
 	#define prelude_nonnull(...)
 	#define prelude_align(pre, name, value) __declspec(align(value)) pre name
 	#define prelude_assume(cond) __assume(cond)	
